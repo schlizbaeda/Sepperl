@@ -1,1 +1,5 @@
-Sepperl V0.1
+Sepperl V0.2
+
+Änderungen:
+1. bla
+2. blablabla
