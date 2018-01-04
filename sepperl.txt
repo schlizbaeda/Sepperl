@@ -1,5 +1,6 @@
-Sepperl V0.2
+Sepperl V0.3
 
 Änderungen:
 1. bla
 2. blablabla
+3. Version schon wieder hochgezählt
