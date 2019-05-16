@@ -11,6 +11,8 @@ a breadboard. You can see the setup in the file [`wiring_schematics.pdf`](https:
 * The GPIO connections from Raspberry Pi to HifiBerry DAC+ are done by breadboard wires
 * The MonkeyBoard (DAB receiver board) is connected to the Raspberry Pi with an USB cable to control it via a serial port (/dev/ttyACM0)
 * The I²S bus lines from the MonkeyBoard are connected to the HifiBerry DAC+ directly. The I²S lines of the Raspberry Pi are disconnected.
+### Attention!
+To make it work you must use a I²S DAC board which is connected to the I2S bus of the Monkeyboard as shown in the file `wiring_schematics.pdf`. 
 
 ## Software Installation on the Raspberry Pi
 Download the latest [Raspbian Stretch Full Image](https://www.raspberrypi.org/downloads/raspbian) and flash it on a SD card >= 8GB as described by the Raspberry Pi Foundation [here](https://www.raspberrypi.org/documentation/installation/installing-images/README.md).
