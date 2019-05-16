@@ -96,8 +96,20 @@ user frontends as there are
 * Graphical User Interface
 * GPIO control
 * Web server control via browser
-* ...
 
+#### dabgui.py
+This Python3 script offers a simple tkinter GUI to control `dabd`.
+When calling this script standalone in the LXTerminal it can be tested
+by keyboard entries:
+```shell
+./dabgui.py
+```
+Each line entered in `stdin` of the LXTerminal will be printed into a
+textbox of the GUI. Any command sent by clicking onto the buttons of
+`dabgui.py` will be sent to `stdout`. It will appear in the LXTerminal
+window.
+
+#### Linux Named Pipes (FIFO)
 
 
 #######################################
