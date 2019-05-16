@@ -12,7 +12,7 @@ the file [`wiring_schematics.pdf`](https://github.com/schlizbaeda/DABradio/blob/
 * The GPIO connections from Raspberry Pi to HifiBerry DAC+ are done by breadboard wires
 * The MonkeyBoard (DAB receiver board) is connected to the Raspberry Pi with an USB cable to control it via a serial port (/dev/ttyACM0)
 * The I²S bus lines from the MonkeyBoard are connected to the HifiBerry DAC+ directly. The I²S lines of the Raspberry Pi are disconnected.
-### Attention!
+#### Attention!
 This project doesn't work on the native audio outputs (HDMI and
 3,5mm socket) of the Raspberry Pi!
 
@@ -28,53 +28,88 @@ activating the HifiBerry DAC+ or a compatible board:
 ```shell
 sudo nano /boot/config.txt
 ```
-and change the audio driver like this:
+and change the audio driver overlay like this:
 ```shell
 # Disable audio (loads snd_bcm2835)
 #dtparam=audio=on
 # Enable the I2S DAC:
 dtoverlay=hifiberry-dacplus
-
 ```
-
+Reboot the Raspberry Pi and start a fake audio playback of a freely 
+chosen audio file via I²S:
+```shell
+omxplayer -o alsa /home/pi/Music/any_audiofile.flac
+```
+Of course, you can't listen to this audio file because the I²S wires
+are disconnected from the Raspberry Pi. But this is necessary to set
+the I²S DAC into an active playback mode which will be used by the
+MonkeyBoard later.
 
 ## Software Installation on the Raspberry Pi
-Download the latest [Raspbian Stretch with desktop and recommended software](https://www.raspberrypi.org/downloads/raspbian)
- ("full image") and flash it on a SD card with capacity of 8GB or
-higher as described by the Raspberry Pi Foundation [here](https://www.raspberrypi.org/documentation/installation/installing-images/README.md).
-Clone this repository onto the Raspberry Pi and start the shell script
-[`setup.sh`](https://github.com/schlizbaeda/DABradio/blob/master/setup.sh).
-
-
-Download the MonkeyBoard demo software for Raspbery Pi:
-```shell
-wget http://www.monkeyboard.org/images/products/dab_fm/raspberrypi_keystone.tgz
-tar -xvzpf raspberrypi_keystone.tgz keystonecomm/
-cd keystonecomm/KeyStoneCOMM/
-sudo make install
-cd ../app/
-make
-./testdab
-```
-
-Download this repository and copy its files into the MonkeyBoard demo app directory:
+Download the latest [Raspbian Stretch with desktop and recommended software ("full image")](https://www.raspberrypi.org/downloads/raspbian)
+and flash it on a SD card with capacity of 8GB or higher as described
+by the Raspberry Pi Foundation [here](https://www.raspberrypi.org/documentation/installation/installing-images/README.md).
+Clone this repository onto the Raspberry Pi and start the installation
+shell script [`setup.sh`](https://github.com/schlizbaeda/DABradio/blob/master/setup.sh)
+in an LXTerminal:
 ```shell
 cd /home/pi
 git clone https://github.com/schlizbaeda/DABradio
-cp DABradio/* keystonecomm/app
-cd keystonecomm/app
-make
-./testdab
+cd DABradio
+./setup.sh
 ```
-Now the demo application is replaced by the DAB radio from this repository.
+Now the KeyStone library delivered by MonkeyBoard is installed properly
+on the Raspbian OS for further use.
 
 ## Getting Started
-This DAB radio application is a command line based application. It receives
-the commands from `stdin` and gives result strings for each command on
-`stdout`. So this application can be used as a module using the `stdin` and
-`stdout` pipe mechanisms. It's quite easy to create an external GUI application
-or a webserver application which is controlled by a web browser as front end
-for this DAB radio.
+`dabd` is a DAB radio daemon which accepts commands from `stdin` and
+sends its result strings to `stdout`. So you can control `dabd` using
+the keyboard.
+
+Call the software `dabd` in the LXTerminal:
+```shell
+cd /home/pi/DABradio
+./dabd
+```
+Start audio playback by entering the following commands into the
+LXTerminal. They will be read by `dabd`:
+```shell
+open
+set volume 9
+set stereo 1
+scan
+list
+playstream 14
+close
+quit
+```
+As you can hear, the DAB playback continues after the connection to the
+MonkeyBoard was closed and the application itself has quit.
+At my home the parameter `14` in the command `playstream ...`
+represents [Radio BOB!](https://www.radiobob.de/), my favourite DAB+
+station. 
+
+## Usage of an advanced frontend
+Using the named pipe (FIFO) mechanism of Linux offers a lot of
+possibilities to redirect the DAB radio control to more convenient
+user frontends as there are
+* Graphical User Interface
+* GPIO control
+* Web server control via browser
+* ...
+
+
+
+#######################################
+This DAB radio application is a command line based daemon application.
+It receives the commands from `stdin` and gives result strings for each
+command on `stdout`. So you can control 
+
+
+So this application can be used as a module using
+the `stdin` and `stdout` pipe mechanisms. It's quite easy to create an
+external GUI application or a webserver application which is controlled
+by a web browser as front end for this DAB radio.
 
 To start the DAB radio, enter these commands:
 ```shell
