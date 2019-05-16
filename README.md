@@ -4,18 +4,47 @@ This DAB radio project is based on a Raspberry Pi and the board
 from [MonkeyBoard](https://www.monkeyboard.org/).
 
 ## Hardware Conception
-This project is still a proof of concept. The hardware is only built on
-a breadboard. You can see the setup in the file [`wiring_schematics.pdf`](https://github.com/schlizbaeda/DABradio/blob/master/wiring_schematics.pdf):
+This project is still a proof of concept! At the moment the hardware
+connections are done on a breadboard. You can see the wiring setup in
+the file [`wiring_schematics.pdf`](https://github.com/schlizbaeda/DABradio/blob/master/wiring_schematics.pdf):
 * A Raspberry Pi is used as base unit
 * A HifiBerry DAC+ is used as audio output because it offers I²S input pins
 * The GPIO connections from Raspberry Pi to HifiBerry DAC+ are done by breadboard wires
 * The MonkeyBoard (DAB receiver board) is connected to the Raspberry Pi with an USB cable to control it via a serial port (/dev/ttyACM0)
 * The I²S bus lines from the MonkeyBoard are connected to the HifiBerry DAC+ directly. The I²S lines of the Raspberry Pi are disconnected.
 ### Attention!
-To make it work you must use a I²S DAC board which is connected to the I2S bus of the Monkeyboard as shown in the file `wiring_schematics.pdf`. 
+This project doesn't work on the native audio outputs (HDMI and
+3,5mm socket) of the Raspberry Pi!
+
+The I²S audio output of the MonkeyBoard needs an I²S-DAC like the
+[PCM5122](http://www.ti.com/product/PCM5122) from Texas Instruments
+to convert the digital audio data into analogue signals. To make this
+demo DAB radio work you will need an I²S DAC board like for example
+the [HifiBerry DAC+](https://www.hifiberry.com/products/dacplus/)
+where the I²S connectors are disconnected from the Raspberry Pi and
+connected to the MonkeyBoard instead as shown in file
+`wiring_schematics.pdf`. Modify the file `/boot/config.txt`for
+activating the HifiBerry DAC+ or a compatible board:
+```shell
+sudo nano /boot/config.txt
+```
+and change the audio driver like this:
+```shell
+# Disable audio (loads snd_bcm2835)
+#dtparam=audio=on
+# Enable the I2S DAC:
+dtoverlay=hifiberry-dacplus
+
+```
+
 
 ## Software Installation on the Raspberry Pi
-Download the latest [Raspbian Stretch Full Image](https://www.raspberrypi.org/downloads/raspbian) and flash it on a SD card >= 8GB as described by the Raspberry Pi Foundation [here](https://www.raspberrypi.org/documentation/installation/installing-images/README.md).
+Download the latest [Raspbian Stretch with desktop and recommended software](https://www.raspberrypi.org/downloads/raspbian)
+ ("full image") and flash it on a SD card with capacity of 8GB or
+higher as described by the Raspberry Pi Foundation [here](https://www.raspberrypi.org/documentation/installation/installing-images/README.md).
+Clone this repository onto the Raspberry Pi and start the shell script
+[`setup.sh`](https://github.com/schlizbaeda/DABradio/blob/master/setup.sh).
+
 
 Download the MonkeyBoard demo software for Raspbery Pi:
 ```shell
