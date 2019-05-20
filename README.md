@@ -119,26 +119,31 @@ On Linux anonymous pipes are created by shell commands like
 ```
 ls -l | grep less
 ```
-Their disadvantage is they offer only a data transfer in a single
-direction. But to use an interactive frontend for `dabd` another
-mecahnism is necessary. 
+The disadvantage is they offer only a data transfer in a single
+direction. But to use an interactive frontend for `dabd` a
+bidirectional mechanism is necessary.
 
---> ******* da geht's weiter...
-anonymous pipes are an alternative to ... They are created(?) by special
-file entries using the p attribute (--> Beipsiel)
+Linux Named Pipes are special files which can be read or written
+by shell redirection. Detailed explanations can be found at
+[www.linuxjournal.com/article/2156](https://www.linuxjournal.com/article/2156)
+or at [unix.stackexchange.com](https://unix.stackexchange.com/questions/53641/how-to-make-bidirectional-pipe-between-two-programs).
 
-Using this Linux out-of-the-box feature
+You need two named pipes, one which sends commands from the GUI to
+`dabd` and another one which receives the data from `dabd`. Their names
+are chosen as `fromDABD`and `toDABD` and they were created by the
+installation script `setup.sh` with command
+```shell
+mkfifo fromDABD toDABD
+```
 
-Die beiden Links:
-https://www.linuxjournal.com/article/2156
-https://unix.stackexchange.com/questions/53641/how-to-make-bidirectional-pipe-between-two-programs
+The shell script `dabradio.sh` calls both programs using the Named
+Pipes in this way:
+```shell
+./dabd >fromDABD <toDABD &
+./dabgui.py <fromDABD >toDABD
+```
 
-
-
-
-#######################################
-
-## Description of the C++ Code
+## Description of the C++ Code for `dabd`
 First this application starts another thread to read its commands from
 `stdin` in parallel. Then it creates the class `KeyStone` which contains
 several methods to control the DAB radio board.
@@ -147,8 +152,8 @@ To convert the UTF-16 strings returned by the original KeyStoneCOMM.h
 into UTF-8 strings the GNU library [libiconv](https://www.gnu.org/software/libiconv/)
 is used.
 
-To get a short help on the `stdin` commands enter the command `help`
-inside the DAB radio application.
+Typing the command `help` on `stdin` inside `dabd` prints a short help
+text onto `stdout`.
 
 ## Hint
 The MOT slideshow feature isn't implemented yet because there are some
