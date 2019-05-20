@@ -1,4 +1,4 @@
-# Raspberry Pi DAB Radio
+# Raspberry Pi DAB Radio Daemon
 This DAB radio project is based on a Raspberry Pi and the board
 [DAB DAB+ FM Digital Radio Development Board Pro with SlideShow](https://www.monkeyboard.org/products/85-developmentboard/85-dab-dab-fm-digital-radio-development-board-pro)
 from [MonkeyBoard](https://www.monkeyboard.org/).
@@ -14,7 +14,7 @@ the file [`wiring_schematics.pdf`](https://github.com/schlizbaeda/DABradio/blob/
 * The I²S bus lines from the MonkeyBoard are connected to the HifiBerry DAC+ directly. The I²S lines of the Raspberry Pi are disconnected.
 #### Attention!
 This project doesn't work on the native audio outputs (HDMI and
-3,5mm socket) of the Raspberry Pi!
+3,5mm socket) of the Raspberry Pi neither on USB soudcards!
 
 The I²S audio output of the MonkeyBoard needs an I²S-DAC like the
 [PCM5122](http://www.ti.com/product/PCM5122) from Texas Instruments
@@ -23,8 +23,16 @@ demo DAB radio work you will need an I²S DAC board like for example
 the [HifiBerry DAC+](https://www.hifiberry.com/products/dacplus/)
 where the I²S connectors are disconnected from the Raspberry Pi and
 connected to the MonkeyBoard instead as shown in file
-`wiring_schematics.pdf`. Modify the file `/boot/config.txt`for
-activating the HifiBerry DAC+ or a compatible board:
+`wiring_schematics.pdf`.
+
+## Software Installation on the Raspberry Pi
+#### Preparation of Raspbian
+Download the latest [Raspbian Stretch with desktop and recommended software ("full image")](https://www.raspberrypi.org/downloads/raspbian)
+and flash it on a SD card with capacity of 8GB or higher as described
+by the Raspberry Pi Foundation [here](https://www.raspberrypi.org/documentation/installation/installing-images/README.md).
+
+Modify the file `/boot/config.txt` for activating the HifiBerry DAC+
+or a compatible board:
 ```shell
 sudo nano /boot/config.txt
 ```
@@ -38,17 +46,15 @@ dtoverlay=hifiberry-dacplus
 Reboot the Raspberry Pi and start a fake audio playback of a freely 
 chosen audio file via I²S:
 ```shell
-omxplayer -o alsa /home/pi/Music/any_audiofile.flac
+omxplayer -o alsa /home/pi/Music/any_audiofile.flac # alternatively any *.mp3 file
 ```
-Of course, you can't listen to this audio file because the I²S wires
-are disconnected from the Raspberry Pi. But this is necessary to set
-the I²S DAC into an active playback mode which will be used by the
-MonkeyBoard later.
+Of course, you won't hear anything from this audio file because the
+I²S wires were disconnected from the Raspberry Pi. But the I²C
+connection of the DAC (PCM5122 resp. HifiBerry DAC+) continues to be
+necessary for setting the I²S DAC into an active playback mode which
+will be used by the MonkeyBoard later.
 
-## Software Installation on the Raspberry Pi
-Download the latest [Raspbian Stretch with desktop and recommended software ("full image")](https://www.raspberrypi.org/downloads/raspbian)
-and flash it on a SD card with capacity of 8GB or higher as described
-by the Raspberry Pi Foundation [here](https://www.raspberrypi.org/documentation/installation/installing-images/README.md).
+#### Installation of the DAB Radio Daemon (`dabd`)
 Clone this repository onto the Raspberry Pi and start the installation
 shell script [`setup.sh`](https://github.com/schlizbaeda/DABradio/blob/master/setup.sh)
 in an LXTerminal:
@@ -85,59 +91,52 @@ quit
 ```
 As you can hear, the DAB playback continues after the connection to the
 MonkeyBoard was closed and the application itself has quit.
-At my home the parameter `14` in the command `playstream ...`
+At my home the parameter `14` of the command `playstream ...`
 represents [Radio BOB!](https://www.radiobob.de/), my favourite DAB+
-station. 
+station. Enjoy listening to DAB Radio.
 
 ## Usage of an advanced frontend
 Using the named pipe (FIFO) mechanism of Linux offers a lot of
 possibilities to redirect the DAB radio control to more convenient
 user frontends as there are
 * Graphical User Interface
-* GPIO control
+* GPIO control (e.g. hardware push buttons or even a remote control via LIRC)
 * Web server control via browser
 
 #### dabgui.py
-This Python3 script offers a simple tkinter GUI to control `dabd`.
-When calling this script standalone in the LXTerminal it can be tested
-by keyboard entries:
+This Python3 script offers a simple tkinter GUI to control `dabd`. Call
+this script standalone in the LXTerminal:
 ```shell
 ./dabgui.py
 ```
-Each line entered in `stdin` of the LXTerminal will be printed into a
-textbox of the GUI. Any command sent by clicking onto the buttons of
-`dabgui.py` will be sent to `stdout`. It will appear in the LXTerminal
-window.
+Test this GUI application by entering some keyboard text. Each line
+entered in `stdin` of the LXTerminal will be printed into a textbox of
+the GUI. Any command sent by clicking onto the buttons of `dabgui.py`
+will be sent to `stdout`. So it will appear in the LXTerminal window.
 
 #### Linux Named Pipes (FIFO)
+On Linux anonymous pipes are created by shell commands like
+```
+ls -l | grep less
+```
+Their disadvantage is they offer only a data transfer in a single
+direction. But to use an interactive frontend for `dabd` another
+mecahnism is necessary. 
+
+--> ******* da geht's weiter...
+anonymous pipes are an alternative to ... They are created(?) by special
+file entries using the p attribute (--> Beipsiel)
+
+Using this Linux out-of-the-box feature
+
+Die beiden Links:
+https://www.linuxjournal.com/article/2156
+https://unix.stackexchange.com/questions/53641/how-to-make-bidirectional-pipe-between-two-programs
+
+
 
 
 #######################################
-This DAB radio application is a command line based daemon application.
-It receives the commands from `stdin` and gives result strings for each
-command on `stdout`. So you can control 
-
-
-So this application can be used as a module using
-the `stdin` and `stdout` pipe mechanisms. It's quite easy to create an
-external GUI application or a webserver application which is controlled
-by a web browser as front end for this DAB radio.
-
-To start the DAB radio, enter these commands:
-```shell
-open
-set volume 9
-set stereo 1
-list
-playstream 14
-close
-quit
-```
-or use the prepared file [`get_started.txt`](https://github.com/schlizbaeda/DABradio/blob/master/get_started.txt)
-in a pipe redirection:
-```shell
-cat get_started.txt | ./testdab
-```
 
 ## Description of the C++ Code
 First this application starts another thread to read its commands from
